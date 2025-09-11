@@ -1,5 +1,6 @@
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_community.vectorstores import Chroma
+from chromadb.config import Settings
 from local_llm import LocalLLM
 
 DB_DIR = "artifacts/chroma"
@@ -7,8 +8,15 @@ DB_DIR = "artifacts/chroma"
 # Load embeddings
 embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# Load vectorstore with embeddings
-db = Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
+# Load vectorstore with embeddings (with Chroma client settings)
+db = Chroma(
+    persist_directory=DB_DIR,
+    embedding_function=embeddings,
+    client_settings=Settings(
+        anonymized_telemetry=False,  # disable telemetry
+        allow_reset=True             # allow reload if DB already exists
+    )
+)
 
 # Instantiate LLM
 llm = LocalLLM(model_name="google/flan-t5-base")
